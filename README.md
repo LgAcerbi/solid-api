@@ -26,6 +26,17 @@
 
 A SOLID Api builded with [Nest](https://github.com/nestjs/nest) framework.
 
+### Principles
+
+* Single-responsiblity Principle
+* Open-closed Principle
+* Liskov Substitution Principle
+* Interface Segregation Principle
+* Dependency Inversion Principle
+* Don't repeat yourself
+* Keep It Simple
+* You aren't gonna need it
+
 ## License
 
 Nest is [MIT licensed](LICENSE).
