@@ -1,68 +1,57 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Positions, User } from './user.model';
-import {v4 as uuidv4} from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { EntitySubscriberInterface, EventSubscriber, InsertEvent, ObjectID } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { GetUserFilterDto } from './dto/get-user-filter.dto';
+import { User } from './user.entity';
+import { UserRepository } from './user.repository';
 
 @Injectable()
+@EventSubscriber()
 export class UsersService {
-    private users: User[] = [];
-    
-    getAllUsers(): User[]{
-        if(!this.users.length){
+    constructor(
+        @InjectRepository(UserRepository)
+        private userRepository: UserRepository
+    ) {}
+
+    async getAllUsers(): Promise<User[]>{
+        const foundUsers = await this.userRepository.find();
+        if(!foundUsers){
             throw new NotFoundException("There's no user registred");
         }
-        return this.users;
+        return foundUsers;
     }
 
-    getUsersByFilters(filterDto): User[] {
-        const {nickname, position} = filterDto;
-        let users = this.getAllUsers();
-        if(position){
-            users = users.filter(user => user.position === position);
+    async getUsersByFilters(filterDto: GetUserFilterDto): Promise<User[]> {
+        const foundUsers = this.userRepository.findUsers(filterDto)
+        if(!foundUsers){
+            throw new NotFoundException("There's no user found with current filters");
         }
-        if(nickname){
-            users = users.filter(user => user.nickname.includes(nickname));
-        }
-        if(!users.length){
-            throw new NotFoundException();
-        }
-        return users;
+        return foundUsers;
     }
-
-    getUserById(id: string): User {
-        const foundUser = this.users.find(user => user.id === id);
+    
+    async getUserById(id: ObjectID): Promise<User>{
+        const foundUser = await this.userRepository.findOne(id);
         if(!foundUser){
-            throw new NotFoundException();
+            throw new NotFoundException(`User with id '${id}' not found`);
         }
         return foundUser;
     }
 
-    setUser(createUserDto: CreateUserDto): User {
-        const {name, age, nickname, position} = createUserDto;
-        
-        const user: User = {
-            id: uuidv4(),
-            name,
-            age,
-            nickname,
-            position: position.toUpperCase(),
-        }
-        this.users.push(user);
-        return user;
+    async setUser(createUserDto: CreateUserDto): Promise<User> {
+        return await this.userRepository.createUser(createUserDto);
     }
 
-    updateUserPositionById(id: string, position: string): User {
-        const foundUser = this.getUserById(id)
+    async updateUserPositionById(id: ObjectID, position: string): Promise<User> {
+        const foundUser = await this.getUserById(id);
         foundUser.position = position;
-        return foundUser;
+        return await foundUser.save();
     }
-
-    deleteUserById(id: string): any{
-        const foundUserIndex = this.users.findIndex(user => user.id === id);
-        if(!foundUserIndex){
-            throw new NotFoundException()
-        }
-        this.users.splice(foundUserIndex,1)
-        return {message: `User ${id} was deleted`};
-    }
+    
+    async deleteUserById(id: ObjectID): Promise<Object>{
+        // const result = await this.userRepository.delete(id);      MongoDB driver não suporta (affected == undefined)
+        const foundUser = await this.getUserById(id);
+        await this.userRepository.delete(foundUser.id);
+        return {message: `User with id '${id}' was deleted`}
+    }   
 }
