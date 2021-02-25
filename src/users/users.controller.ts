@@ -5,6 +5,7 @@ import { ObjectIdValidationPipe } from '../global-pipes/objectid-validation.pipe
 import { UserPositionValidationPipe } from './pipes/user-position-validation.pipe';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
+import { ObjectID } from 'typeorm';
 
 @Controller('user')
 export class UsersController {
@@ -21,7 +22,7 @@ export class UsersController {
     }
 
     @Get('/:id')
-    getUserById(@Param('id', ObjectIdValidationPipe) id: any): Promise<User> {
+    getUserById(@Param('id', ObjectIdValidationPipe) id: ObjectID): Promise<User> {
         return this.userService.getUserById(id);
     }
 
@@ -40,8 +41,8 @@ export class UsersController {
     // }
     
 
-    // @Delete('/:id')
-    // deleteUserById(@Param('id') id: string): User{
-    //     return this.userService.deleteUserById(id);
-    // }
+    @Delete('/:id')
+    deleteUserById(@Param('id', ObjectIdValidationPipe) id: any): Promise<any>{
+        return this.userService.deleteUserById(id);
+    }
 }

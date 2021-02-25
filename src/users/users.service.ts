@@ -1,16 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ObjectId } from 'mongodb';
+import { EntitySubscriberInterface, EventSubscriber, InsertEvent, ObjectID } from 'typeorm';
+import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
 
 @Injectable()
+@EventSubscriber()
 export class UsersService {
     constructor(
         @InjectRepository(UserRepository)
         private userRepository: UserRepository
-        ) {}
-    //private users: User[] = [];
+    ) {}
 
     async getAllUsers(): Promise<User[]>{
         const foundUsers = await this.userRepository.find();
@@ -19,13 +22,6 @@ export class UsersService {
         }
         return foundUsers;
     }
-    
-    // getAllUsers(): User[]{
-    //     if(!this.users.length){
-    //         throw new NotFoundException("There's no user registred");
-    //     }
-    //     return this.users;
-    // }
 
     // getUsersByFilters(filterDto): User[] {
     //     const {nickname, position} = filterDto;
@@ -42,7 +38,7 @@ export class UsersService {
     //     return users;
     // }
     
-    async getUserById(id: any): Promise<User>{
+    async getUserById(id: ObjectID): Promise<User>{
         const foundUser = await this.userRepository.findOne(id);
         if(!foundUser){
             throw new NotFoundException(`User with id '${id}' not found`);
@@ -51,42 +47,17 @@ export class UsersService {
     }
 
     async setUser(createUserDto: CreateUserDto): Promise<User> {
-        const {name, age, nickname, position} = createUserDto;
-        const user = new User();
-        user.name = name;
-        user.age = age;
-        user.nickname = nickname;
-        user.position = position;
-
-        return await user.save()
+        return await this.userRepository.createUser(createUserDto);
     }
-
-    // setUser(createUserDto: CreateUserDto): User {
-    //     const {name, age, nickname, position} = createUserDto;
-        
-    //     const user: User = {
-    //         id: uuidv4(),
-    //         name,
-    //         age,
-    //         nickname,
-    //         position: position.toUpperCase(),
-    //     }
-    //     this.users.push(user);
-    //     return user;
-    // }
 
     // updateUserPositionById(id: string, position: string): User {
     //     const foundUser = this.getUserById(id)
     //     foundUser.position = position;
     //     return foundUser;
     // }
-
-    // deleteUserById(id: string): any{
-    //     const foundUserIndex = this.users.findIndex(user => user.id === id);
-    //     if(!foundUserIndex){
-    //         throw new NotFoundException()
-    //     }
-    //     this.users.splice(foundUserIndex,1)
-    //     return {message: `User ${id} was deleted`};
-    // }
+    async deleteUserById(id: ObjectID): Promise<any>{
+        // const result = await this.userRepository.delete(id);      MongoDB driver não suporta (affected == undefined)
+        const foundUser = await this.getUserById(id);
+        return {message: `User with id '${id}' was deleted`}
+    }   
 }
