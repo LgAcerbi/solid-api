@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, PipeTransform } from "@nestjs/common";
-import { ObjectId } from "mongodb";
+import { ObjectID } from "mongodb";
 
 @Injectable()
 export class ObjectIdValidationPipe implements PipeTransform {
 
-    transform(id: any): ObjectId {
+    transform(id: any): ObjectID {
         if(!this.isValidId(id)){
             throw new BadRequestException(`'${id}' is not a valid ObjectId`)
         }
@@ -12,7 +12,7 @@ export class ObjectIdValidationPipe implements PipeTransform {
     }
     private isValidId(id: any) {
         try {
-            return new ObjectId(id).toString() === id;
+            return new ObjectID(id).toString() === id;
         } catch (error) {
             return null;
         }
