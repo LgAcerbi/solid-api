@@ -12,13 +12,13 @@ export class UsersController {
     constructor(private userService: UsersService){}
 
     @Get()
-    getUsers(@Query(ValidationPipe) filterDto: GetUserFilterDto): Promise<User[]> {
-        if(Object.keys(filterDto).length){
-            //return this.userService.getUsersByFilters(filterDto);
-        }
-        else{
-            return this.userService.getAllUsers();
-        }
+    getUsersByFilters(@Query(ValidationPipe) filterDto: GetUserFilterDto): Promise<User[]> {
+        return this.userService.getUsersByFilters(filterDto);
+    }
+
+    @Get('/all')
+    getAllUsers(): Promise<User[]> {
+        return this.userService.getAllUsers();
     }
 
     @Get('/:id')
@@ -34,12 +34,14 @@ export class UsersController {
     }
     
 
-    // //Exemplo de validação com pipe personalizado
-    // @Patch('/:id/:position')
-    // updateUserPositionById(@Param('id') id: string, @Param('position', UserPositionValidationPipe) position: string): User{
-    //     return this.userService.updateUserPositionById(id, position);
-    // }
-    
+    //Exemplo de validação com pipe personalizado
+    @Patch('/:id/:position')
+    updateUserPositionById(
+        @Param('id', ObjectIdValidationPipe) id: ObjectID, 
+        @Param('position', UserPositionValidationPipe) position: string
+        ): Promise<User> {
+        return this.userService.updateUserPositionById(id, position);
+    }
 
     @Delete('/:id')
     deleteUserById(@Param('id', ObjectIdValidationPipe) id: any): Promise<any>{
