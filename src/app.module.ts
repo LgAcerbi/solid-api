@@ -1,23 +1,15 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { typeOrmConfig } from './configs/typeorm.config'
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DatabaseConfig } from './configs/database.config'
 
 @Module({
   imports: [
     ConfigModule.forRoot(
       {isGlobal: true}
     ),
-    TypeOrmModule.forRoot({
-      type: 'mongodb',
-      url: process.env.MONGO_URI,
-      useNewUrlParser: true,
-      autoLoadEntities: true,
-      synchronize: true,
-      logging: true,
-      useUnifiedTopology: true
-    }),
+    TypeOrmModule.forRoot(DatabaseConfig.getConfigs()),
     UsersModule,
   ],
 })
