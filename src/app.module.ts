@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
-// import { UsersController } from './users/users.controller';
-// import { UsersService } from './users/users.service';
-import { typeOrmConfig } from './configs/typeorm.config'
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DatabaseConfig } from './configs/database.config'
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeOrmConfig),
+    ConfigModule.forRoot(
+      {isGlobal: true}
+    ),
+    TypeOrmModule.forRoot(DatabaseConfig.getConfigs()),
     UsersModule,
   ],
-  /*controllers: [UsersController], 
-  providers: [UsersService] */
 })
 export class AppModule {}
