@@ -1,16 +1,24 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
-// import { UsersController } from './users/users.controller';
-// import { UsersService } from './users/users.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { typeOrmConfig } from './configs/typeorm.config'
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeOrmConfig),
+    ConfigModule.forRoot(
+      {isGlobal: true}
+    ),
+    TypeOrmModule.forRoot({
+      type: 'mongodb',
+      url: process.env.MONGO_URI,
+      useNewUrlParser: true,
+      autoLoadEntities: true,
+      synchronize: true,
+      logging: true,
+      useUnifiedTopology: true
+    }),
     UsersModule,
   ],
-  /*controllers: [UsersController], 
-  providers: [UsersService] */
 })
 export class AppModule {}
