@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserFilterDto } from './dto/get-user-filter.dto';
-import { ObjectIdValidationPipe } from '../global-pipes/objectid-validation.pipe';
+import { ObjectIdValidationPipe } from '../../global-pipes/objectid-validation.pipe';
 import { UserPositionValidationPipe } from './pipes/user-position-validation.pipe';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
