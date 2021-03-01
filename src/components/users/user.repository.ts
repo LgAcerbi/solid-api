@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from "typeorm";
+import { EntityRepository, ObjectID, Repository, MongoRepository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { GetUserFilterDto } from "./dto/get-user-filter.dto";
 import { User } from "./user.entity";
@@ -27,5 +27,11 @@ export class UserRepository extends Repository<User> {
         user.position = position;
 
         return await user.save();
+    }
+
+    async updateUserPosition(foundUser: User, position: string): Promise<User>{
+        foundUser.position = position;
+        foundUser.save();
+        return foundUser;
     }
 }

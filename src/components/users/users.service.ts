@@ -7,7 +7,6 @@ import { User } from './user.entity';
 import { UserRepository } from './user.repository';
 
 @Injectable()
-@EventSubscriber()
 export class UsersService {
     constructor(
         @InjectRepository(UserRepository)
@@ -44,8 +43,8 @@ export class UsersService {
 
     async updateUserPositionById(id: ObjectID, position: string): Promise<User> {
         const foundUser = await this.getUserById(id);
-        foundUser.position = position;
-        return await foundUser.save();
+        const updatedUser = await this.userRepository.updateUserPosition(foundUser, position);
+        return updatedUser;
     }
     
     async deleteUserById(id: ObjectID): Promise<Object>{
