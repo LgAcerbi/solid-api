@@ -22,7 +22,8 @@ describe('UserController (e2e)', () => {
       findOne: () => userMock,
       createUser: () => userMock,
       findUsers: () => [userMock],
-      updateUserPosition: () => userMock
+      updateUserPosition: () => userMock,
+      delete: () => undefined
     };
     const module: TestingModule = await Test.createTestingModule({
       imports: [UsersModule],
@@ -42,7 +43,7 @@ describe('UserController (e2e)', () => {
         .expect([userMock]);
     });
 
-    it('returns 404 and Not Found', async () => {
+    it('returns 404 (Not Found)', async () => {
       userRepository.find = () => undefined
       await request(app.getHttpServer()) 
         .get('/user/all')
@@ -59,7 +60,7 @@ describe('UserController (e2e)', () => {
         .expect(200)
         .expect([userMock]);
     })
-    it('returns 404 and Not Found', async () => {
+    it('returns 404 (Not Found)', async () => {
       userRepository.findUsers = () => undefined;
       await request(app.getHttpServer()) 
         .get('/user')
@@ -68,7 +69,7 @@ describe('UserController (e2e)', () => {
         .expect({statusCode: 404, message: "There's no user found with current filters", error: "Not Found"});
     })
 
-    it('returns 400 and Bad Request', async () => {
+    it('returns 400 (Bad Request)', async () => {
       await request(app.getHttpServer()) 
         .get('/user')
         .query({ nickname: new ObjectID(), position: new ObjectID() })
@@ -84,7 +85,7 @@ describe('UserController (e2e)', () => {
         .expect(userMock);
     });
 
-    it('returns 404 and Not Found', async () => {
+    it('returns 404 (Not Found)', async () => {
       userRepository.findOne = () => undefined;
       const randomId = new ObjectID();
       await request(app.getHttpServer()) 
@@ -93,7 +94,7 @@ describe('UserController (e2e)', () => {
         .expect({statusCode:404, message:`User with id '${randomId}' not found`, error:"Not Found"})
     });
 
-    it('return 400 and Bad Request', async () => {
+    it('return 400 (Bad Request)', async () => {
       await request(app.getHttpServer()) 
         .get(`/user/aaaaaaaa`)
         .expect(400)
@@ -109,7 +110,7 @@ describe('UserController (e2e)', () => {
         .expect(201)
         .expect(userMock);
     });
-    it('returns 400 and Bad Request', async () => {
+    it('returns 400 (Bad Request)', async () => {
       await request(app.getHttpServer()) 
         .post(`/user`)
         .send({})
@@ -127,13 +128,12 @@ describe('UserController (e2e)', () => {
         .expect(200)
         .expect(updatedUser);
     });
-    it('returns 400 and Bad Request', async () => {
+    it('returns 400 (Bad Request)', async () => {
       await request(app.getHttpServer()) 
         .patch('/user/aaaaaa/ADCARRY')
         .expect(400)
     });
-
-    it('returns 404 and Bad Request', async () => {
+    it('returns 404 (Not Found)', async () => {
       const randomId = new ObjectID();
       userRepository.findOne = () => undefined;
       await request(app.getHttpServer()) 
@@ -141,6 +141,28 @@ describe('UserController (e2e)', () => {
         .expect(404)
         .expect({statusCode:404, message:`User with id '${randomId}' not found`, error:"Not Found"})
     });
+  })
+
+  describe('/user (DELETE)', () => {
+    it('returns 200 and success message', async ()=> {
+      await request(app.getHttpServer()) 
+      .delete(`/user/${userMock.id}`)
+      .expect(200)
+    })
+
+    it('returns 400 (Bad Request)', async ()=> {
+      await request(app.getHttpServer()) 
+      .delete('/user/aaaaaa')
+      .expect(400)
+    })
+
+    it('returns 404 (Bad Request)', async ()=> {
+      userRepository.findOne = () => undefined;
+      const randomId = new ObjectID();
+      await request(app.getHttpServer()) 
+      .delete(`/user/${randomId}`)
+      .expect(404)
+    })
   })
 
   afterAll(async () => { 
